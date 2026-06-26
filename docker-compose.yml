@@ -3,11 +3,17 @@ version: '3.8'
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python manage.py migrate && python manage.py configurar_roles --email admin@codeacademy.com --password admin123 && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
       - "8000:8000"
+    environment:
+      - POSTGRES_DB=codeacademy
+      - POSTGRES_USER=codeacademy
+      - POSTGRES_PASSWORD=codeacademy
+      - DB_HOST=db
+      - DB_PORT=5432
     depends_on:
       - db
   db:

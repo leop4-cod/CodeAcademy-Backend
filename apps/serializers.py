@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.models import Group
 from .models import (
     User, Category, Subcategory, Course, Lesson,
     Enrollment, Review, Certificate, Progress,
@@ -8,14 +10,35 @@ from .models import (
 )
 
 
+class TokenPersonalizadoSerializer(TokenObtainPairSerializer):
+    username_field = User.USERNAME_FIELD
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['is_staff'] = user.is_staff
+        return token
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'email', 'first_name', 'last_name', 'is_teacher', 'is_student', 'bio', 'avatar', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
+    def validate_email(self, value):
+        qs = User.objects.filter(email=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError('Ya existe un usuario con este correo electrónico.')
+        return value
+
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
+        grupo_usuario, _ = Group.objects.get_or_create(name='Usuario')
+        user.groups.add(grupo_usuario)
         return user
 
 
@@ -43,7 +66,10 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'title', 'description', 'price', 'image', 'category', 'subcategory', 'category_name', 'teacher', 'lessons', 'created_at', 'is_published')
+        fields = (
+            'id', 'title', 'description', 'price', 'image', 'category', 'subcategory',
+            'category_name', 'teacher', 'lessons', 'created_at', 'is_published'
+        )
 
 
 class EnrollmentSerializer(serializers.ModelSerializer):
@@ -60,6 +86,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = '__all__'
         read_only_fields = ('student',)
+
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError('La calificación debe estar entre 1 y 5.')
+        return value
 
 
 class CertificateSerializer(serializers.ModelSerializer):
