@@ -1,23 +1,6 @@
+# CodeAcademy API
 
-# CodeAcademy Backend
-
-Backend desarrollado para la plataforma **CodeAcademy**, una aplicación web orientada a la gestión de cursos en línea. El proyecto fue implementado con **Django 4.2**, **Django REST Framework** y **PostgreSQL**, siguiendo una arquitectura **REST** que permite la integración con aplicaciones web y móviles.
-
-El sistema ofrece funcionalidades para administrar usuarios, cursos, lecciones, evaluaciones, certificados, foros de discusión y otros recursos relacionados con el aprendizaje en línea. Además, incorpora autenticación mediante **JSON Web Token (JWT)**, control de acceso basado en roles y documentación automática utilizando **Swagger** y **ReDoc**.
-
----
-
-# Tecnologías utilizadas
-
-- Python 3
-- Django 4.2
-- Django REST Framework
-- PostgreSQL
-- Simple JWT
-- Docker
-- Gunicorn
-- Nginx
-- drf-spectacular (Swagger y ReDoc)
+API REST para la gestión de plataformas de educación en línea: cursos, lecciones, inscripciones, evaluaciones, foros de discusión, certificados y más.
 
 ---
 
@@ -34,312 +17,360 @@ El sistema ofrece funcionalidades para administrar usuarios, cursos, lecciones, 
 
 ---
 
-# Características principales
+## Descripción del sistema
 
-El backend implementa las siguientes funcionalidades:
+CodeAcademy API es un backend desarrollado con **Django REST Framework** que permite a instituciones educativas, tutores y estudiantes gestionar integralmente la experiencia de aprendizaje digital. El sistema ofrece:
 
-- Registro de usuarios.
-- Inicio de sesión mediante JWT.
-- Administración de cursos.
-- Gestión de categorías y subcategorías.
-- Administración de lecciones.
-- Gestión de evaluaciones.
-- Inscripción de estudiantes.
-- Seguimiento del progreso.
-- Emisión de certificados.
-- Sistema de reseñas.
-- Foros de discusión.
-- Gestión de etiquetas para cursos.
-- Lista de deseos.
-- API completamente documentada.
-- Despliegue en VPS utilizando Gunicorn y Nginx.
+- **Autenticación segura con JWT** (access + refresh tokens)
+- **Roles de usuario y control de acceso**: Usuario y Administrador (con soporte para perfiles de Estudiante y Profesor)
+- **CRUD completo** de cursos, lecciones, categorías, subcategorías y etiquetas
+- **Módulo de evaluaciones (Quizzes)** con gestión de preguntas, respuestas, intentos y puntajes
+- **Sistema de foros de discusión** con temas (posts) y respuestas (comentarios) en vivo por curso
+- **Seguimiento de progreso educativo**, lista de deseos (wishlist) y calificaciones/reseñas de cursos
+- **Emisión automática de certificados** de finalización de curso
+- **Despliegue en producción** optimizado con **Gunicorn + Nginx + PostgreSQL** en servidor VPS (DigitalOcean)
 
 ---
 
-# Modelo de Base de Datos
+## Instalación local
 
-La aplicación utiliza **PostgreSQL** como gestor de base de datos relacional. El modelo está conformado por **20 tablas**, las cuales representan los principales módulos del sistema.
-
-| Tabla | Descripción |
-|--------|-------------|
-| **User** | Información de los usuarios registrados. |
-| **Category** | Categorías generales de los cursos. |
-| **Subcategory** | Subcategorías pertenecientes a una categoría. |
-| **Course** | Información principal de cada curso. |
-| **Lesson** | Lecciones que conforman un curso. |
-| **Enrollment** | Registro de estudiantes inscritos. |
-| **Review** | Calificaciones y opiniones de los cursos. |
-| **Certificate** | Certificados emitidos al completar un curso. |
-| **Progress** | Seguimiento del avance del estudiante. |
-| **Quiz** | Evaluaciones de los cursos. |
-| **Question** | Preguntas de una evaluación. |
-| **Answer** | Respuestas de las preguntas. |
-| **QuizAttempt** | Intentos realizados por un estudiante. |
-| **QuizAnswer** | Respuestas registradas durante un intento. |
-| **DiscussionForum** | Foros de discusión de cada curso. |
-| **ForumPost** | Publicaciones realizadas en un foro. |
-| **ForumComment** | Comentarios asociados a una publicación. |
-| **Tag** | Etiquetas para clasificar cursos. |
-| **CourseTag** | Relación entre cursos y etiquetas. |
-| **Wishlist** | Lista de cursos guardados por un usuario. |
-
-## Relaciones implementadas
-
-### One-to-One
-
-- **Certificate → Enrollment**
-
-Cada inscripción puede generar un único certificado cuando el estudiante finaliza el curso.
-
-### One-to-Many
-
-- Category → Subcategory
-- Category → Course
-- Course → Lesson
-- Course → Quiz
-- Quiz → Question
-- Question → Answer
-- DiscussionForum → ForumPost
-- ForumPost → ForumComment
-- User → Enrollment
-- User → Review
-
-### Many-to-Many
-
-- **Course ↔ Tag**
-
-La relación se implementa mediante la tabla **CourseTag**, permitiendo que un curso tenga varias etiquetas y que una etiqueta pueda asociarse a múltiples cursos.
-
----
-
-# Instalación
-
-## 1. Clonar el repositorio
+### 1. Clonar el repositorio
 
 ```bash
 git clone https://github.com/sergio001g/CodeAcademy_bakend.git
 cd CodeAcademy_bakend
 ```
 
-## 2. Crear el entorno virtual
+### 2. Crear el entorno virtual
 
 ```bash
 python -m venv venv
+source venv/bin/activate        # Linux/Mac
+venv\Scripts\activate           # Windows
 ```
 
-### Linux / macOS
-
-```bash
-source venv/bin/activate
-```
-
-### Windows
-
-```bash
-venv\Scripts\activate
-```
-
-## 3. Instalar dependencias
+### 3. Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-# Configuración
-
-Crear el archivo `.env`.
+### 4. Configurar variables de entorno
 
 ```bash
 cp .env.example .env
 ```
 
-Variables principales:
+Contenido mínimo del `.env`:
 
 ```env
-POSTGRES_DB=codeacademy
-POSTGRES_USER=codeacademy
-POSTGRES_PASSWORD=codeacademy
-DB_HOST=localhost
+# Django
+SECRET_KEY=
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# PostgreSQL
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+
+# CORS
+CORS_ALLOW_ALL_ORIGINS=
 ```
 
----
-
-# Migraciones
-
-Crear la estructura de la base de datos.
+### 5. Ejecutar migraciones
 
 ```bash
+python manage.py makemigrations users courses enrollments reviews quizzes forums
 python manage.py migrate
 ```
 
-Crear el usuario administrador.
+### 6. Configurar roles y crear superusuario administrador
 
 ```bash
-python manage.py configurar_roles --email admin@codeacademy.com --password admin123
+python manage.py configurar_roles
 ```
+
+### 7. Ejecutar el servidor de desarrollo
+
+```bash
+python manage.py runserver
+```
+
+La API estará disponible en `http://localhost:8000/api/` y la documentación interactiva en `http://localhost:8000/api/docs/`.
 
 ---
 
-# Ejecución con Docker
+## Despliegue en producción (DigitalOcean VPS)
+
+### Requisitos previos
+
+- VM Ubuntu 24.04 / 22.04 en DigitalOcean
+- Puerto 80 y 443 abiertos en el Firewall
+
+### 1. Configuración del VPS
 
 ```bash
-docker-compose up --build -d
+# Crear usuario del sistema
+sudo adduser codeacademy
+sudo usermod -aG www-data codeacademy
+
+# Clonar el proyecto
+sudo mkdir -p /opt/codeacademy
+sudo chown codeacademy:www-data /opt/codeacademy
+cd /opt/codeacademy
+git clone https://github.com/sergio001g/CodeAcademy_bakend.git CodeAcademy_bakend
+cd CodeAcademy_bakend
+
+# Crear entorno virtual e instalar dependencias
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install django-cors-headers whitenoise
 ```
 
-Migraciones:
+### 2. Configuración de PostgreSQL
 
 ```bash
-docker-compose exec web python manage.py migrate
+sudo apt install -y postgresql postgresql-contrib
+sudo -u postgres psql
+
+-- En psql:
+CREATE DATABASE codeacademy_db;
+CREATE USER codeacademy_user WITH PASSWORD 'tu_password';
+GRANT ALL PRIVILEGES ON DATABASE codeacademy_db TO codeacademy_user;
+\q
 ```
 
-Administrador:
+### 3. Configuración de Gunicorn
+
+Crear `/etc/systemd/system/gunicorn.service`:
+
+```ini
+[Unit]
+Description=Gunicorn daemon para CodeAcademy Backend
+After=network.target postgresql.service
+
+[Service]
+User=codeacademy
+Group=www-data
+WorkingDirectory=/opt/codeacademy/CodeAcademy_bakend
+ExecStart=/opt/codeacademy/CodeAcademy_bakend/venv/bin/gunicorn \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          --access-logfile /var/log/gunicorn/access.log \
+          --error-logfile /var/log/gunicorn/error.log \
+          core.wsgi:application
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
 
 ```bash
-docker-compose exec web python manage.py configurar_roles --email admin@codeacademy.com --password admin123
+sudo mkdir -p /var/log/gunicorn
+sudo systemctl daemon-reload
+sudo systemctl start gunicorn
+sudo systemctl enable gunicorn
 ```
 
----
+### 4. Configuración de Nginx
 
-# Autenticación
-
-La API utiliza **JSON Web Token (JWT)**.
-
-## Registro
-
-```http
-POST /api/auth/register/
+```bash
+sudo apt install -y nginx
 ```
 
-```json
-{
-    "email":"usuario@example.com",
-    "password":"miPassword123",
-    "first_name":"Juan",
-    "last_name":"Pérez"
+Crear `/etc/nginx/sites-available/codeacademy`:
+
+```nginx
+server {
+    listen 80;
+    server_name codeacademy-api.uaeftt-ute.site 159.223.133.69;
+
+    client_max_body_size 10M;
+
+    location /static/ {
+        alias /opt/codeacademy/CodeAcademy_bakend/staticfiles/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location /media/ {
+        alias /opt/codeacademy/CodeAcademy_bakend/media/;
+        expires 30d;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+        proxy_read_timeout 90;
+        proxy_connect_timeout 90;
+    }
 }
 ```
 
-## Inicio de sesión
+```bash
+sudo ln -sf /etc/nginx/sites-available/codeacademy /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+```
 
-```http
-POST /api/auth/login/
+---
+
+## Uso de la API
+
+### Obtención de token JWT
+`POST /api/auth/login/`
+
+```json
+{
+  "email": "admin@codeacademy.com",
+  "password": "tu_password"
+}
 ```
 
 Respuesta:
 
 ```json
 {
-    "access":"token_jwt",
-    "refresh":"refresh_token"
+  "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
-Para acceder a las rutas protegidas:
+### Uso de endpoints protegidos
+Incluye el token en el header de cada petición:
 
 ```http
-Authorization: Bearer <access_token>
+Authorization: Bearer <TU_ACCESS_TOKEN>
 ```
 
-Renovar token:
+### Ejemplos de peticiones
 
-```http
-POST /api/auth/token/refresh/
+**Registrar usuario:**
+```bash
+curl -X POST https://codeacademy-api.uaeftt-ute.site/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{"email": "usuario@codeacademy.com", "password": "tu_password", "first_name": "Usuario", "last_name": "Ejemplo"}'
 ```
 
----
+**Listar cursos (con búsqueda, ordenamiento y paginación):**
+```bash
+curl "https://codeacademy-api.uaeftt-ute.site/api/courses/?search=django&ordering=price&page=1"
+```
 
-# Recursos disponibles
+**Crear un curso:**
+```bash
+curl -X POST https://codeacademy-api.uaeftt-ute.site/api/courses/ \
+  -H "Authorization: Bearer TU_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "category": 1,
+    "teacher": 1,
+    "title": "Curso Profesional de Django REST Framework",
+    "description": "Domina la creación de APIs profesionales",
+    "price": "29.99",
+    "is_published": true
+  }'
+```
 
-Todos los módulos implementan operaciones **CRUD (Create, Read, Update y Delete)**.
-
-- Users
-- Categories
-- Subcategories
-- Courses
-- Lessons
-- Enrollments
-- Reviews
-- Certificates
-- Progress
-- Quizzes
-- Questions
-- Answers
-- Quiz Attempts
-- Quiz Answers
-- Discussion Forums
-- Forum Posts
-- Forum Comments
-- Tags
-- Course Tags
-- Wishlist
-
-La API permite realizar búsquedas, filtros, ordenamiento y paginación.
-
-Ejemplos:
-
-```http
-GET /api/courses/?search=django
-GET /api/categories/?search=web
-GET /api/enrollments/?ordering=-enrolled_at
+**Refrescar token:**
+```bash
+curl -X POST https://codeacademy-api.uaeftt-ute.site/api/auth/token/refresh/ \
+  -H "Content-Type: application/json" \
+  -d '{"refresh": "TU_REFRESH_TOKEN"}'
 ```
 
 ---
 
-# Roles y permisos
+## Endpoints
 
-## Usuario
+Todos los endpoints usan el prefijo `/api/`. Los endpoints protegidos requieren el header `Authorization: Bearer <token>`.
 
-- Consultar cursos y recursos públicos.
-- Inscribirse en cursos.
-- Crear reseñas.
-- Publicar en los foros.
-- Comentar publicaciones.
-- Administrar únicamente sus propios registros.
+### 🔐 Autenticación
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/auth/register/` | Registrar nuevo usuario |
+| POST | `/api/auth/login/` | Iniciar sesión y obtener tokens JWT |
+| POST | `/api/auth/token/refresh/` | Refrescar access token |
 
-## Administrador
+### 👤 Usuarios (`apps/users`)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/users/` | Listar usuarios (Search & Ordering) |
+| POST | `/api/users/` | Crear usuario (Admin) |
+| GET | `/api/users/{id}/` | Detalle de usuario |
+| PUT / PATCH | `/api/users/{id}/` | Actualizar usuario |
+| DELETE | `/api/users/{id}/` | Eliminar usuario |
 
-- Gestión completa de usuarios.
-- Gestión de cursos.
-- Gestión de categorías.
-- Gestión de certificados.
-- Administración de evaluaciones.
-- Acceso a todas las operaciones CRUD.
+### 📚 Categorías y Subcategorías (`apps/courses`)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET / POST | `/api/categories/` | Listar y crear categorías |
+| GET / PUT / DELETE | `/api/categories/{id}/` | Detalle, actualizar y eliminar categoría |
+| GET / POST | `/api/subcategories/` | Listar y crear subcategorías |
+| GET / PUT / DELETE | `/api/subcategories/{id}/` | Detalle, actualizar y eliminar subcategoría |
 
-Las rutas protegidas requieren un token JWT válido. Si no existe autenticación, la API responde con **401 Unauthorized**. Cuando el usuario autenticado no tiene permisos suficientes, la respuesta es **403 Forbidden**.
+### 🎓 Cursos y Lecciones (`apps/courses`)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET / POST | `/api/courses/` | Listar y crear cursos (Filtros: categoría, profesor, precio) |
+| GET / PUT / DELETE | `/api/courses/{id}/` | Detalle, actualizar y eliminar curso |
+| GET / POST | `/api/lessons/` | Listar y crear lecciones por curso |
+| GET / PUT / DELETE | `/api/lessons/{id}/` | Detalle, actualizar y eliminar lección |
+
+### 🏷️ Etiquetas (`apps/courses`)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET / POST | `/api/tags/` | Listar y crear etiquetas |
+| GET / PUT / DELETE | `/api/tags/{id}/` | Detalle, actualizar y eliminar etiqueta |
+| GET / POST | `/api/course-tags/` | Asignar etiquetas a cursos |
+
+### 📝 Inscripciones y Progreso (`apps/enrollments`)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET / POST | `/api/enrollments/` | Listar e inscribirse a un curso |
+| GET / DELETE | `/api/enrollments/{id}/` | Detalle y cancelar inscripción |
+| GET / POST | `/api/progress/` | Registrar y listar avance de lecciones |
+| GET / POST / DELETE | `/api/wishlist/` | Gestionar lista de deseos de cursos |
+
+### ⭐ Reseñas y Certificados (`apps/reviews`)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET / POST | `/api/reviews/` | Listar y crear calificaciones/reseñas (1-5 estrellas) |
+| GET / PUT / DELETE | `/api/reviews/{id}/` | Detalle, editar y eliminar reseña |
+| GET / POST | `/api/certificates/` | Consultar y emitir certificados de finalización |
+
+### 📊 Evaluaciones (Quizzes) (`apps/quizzes`)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET / POST | `/api/quizzes/` | Listar y crear exámenes de curso |
+| GET / POST | `/api/questions/` | Gestionar preguntas del examen |
+| GET / POST | `/api/answers/` | Gestionar opciones de respuesta |
+| GET / POST | `/api/quiz-attempts/` | Registrar e historial de intentos del estudiante |
+| GET / POST | `/api/quiz-answers/` | Registrar respuestas seleccionadas por el estudiante |
+
+### 💬 Foros de Discusión (`apps/forums`)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET / POST | `/api/discussion-forums/` | Listar y crear foros por curso |
+| GET / POST | `/api/forum-posts/` | Listar y crear publicaciones/dudas |
+| GET / POST | `/api/forum-comments/` | Comentar en las publicaciones del foro |
 
 ---
 
-# Documentación de la API
+## Stack tecnológico
 
-La documentación se genera automáticamente mediante **drf-spectacular**.
-
-| Recurso | URL |
-|----------|-----|
-| Swagger | https://codeacademy-api.uaeftt-ute.site/api/docs/ |
-| ReDoc | https://codeacademy-api.uaeftt-ute.site/api/docs/redoc/ |
-| OpenAPI Schema | https://codeacademy-api.uaeftt-ute.site/api/schema/ |
-
-También se incluye una colección de **Postman** para facilitar las pruebas de todos los endpoints.
-
----
-
-# Despliegue
-
-La aplicación fue desplegada en un servidor **VPS** utilizando la siguiente arquitectura:
-
-- Ubuntu Server
-- PostgreSQL
-- Gunicorn
-- Nginx
-- Django
-
-Gunicorn ejecuta la aplicación Django mientras que Nginx funciona como proxy inverso, permitiendo exponer la API mediante un dominio público.
-
----
-
-# Licencia
-
-Este proyecto fue desarrollado con fines académicos para la asignatura correspondiente y puede utilizarse como referencia para proyectos educativos basados en Django y Django REST Framework.
-````
+- **Backend:** Python 3.12 / 3.10, Django 4.2, Django REST Framework
+- **Base de datos:** PostgreSQL 15 / 16
+- **Autenticación:** JWT (`djangorestframework-simplejwt`)
+- **Documentación API:** `drf-spectacular` (Swagger UI & ReDoc)
+- **Servidor WSGI:** Gunicorn
+- **Proxy inverso:** Nginx
+- **Infraestructura:** DigitalOcean VPS (Ubuntu Linux)
