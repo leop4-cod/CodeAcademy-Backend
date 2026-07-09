@@ -12,6 +12,7 @@ class EsAdministradorOReadOnly(permissions.BasePermission):
             and (
                 request.user.is_superuser
                 or request.user.is_staff
+                or request.user.is_teacher
                 or request.user.groups.filter(name='Administrador').exists()
             )
         )
@@ -26,6 +27,7 @@ class EsAdministrador(permissions.BasePermission):
             and (
                 request.user.is_superuser
                 or request.user.is_staff
+                or request.user.is_teacher
                 or request.user.groups.filter(name='Administrador').exists()
             )
         )
@@ -51,6 +53,7 @@ class EsLecturaPublicaEscrituraAuth(permissions.BasePermission):
             and (
                 request.user.is_superuser
                 or request.user.is_staff
+                or request.user.is_teacher
                 or request.user.groups.filter(name='Administrador').exists()
             )
         )

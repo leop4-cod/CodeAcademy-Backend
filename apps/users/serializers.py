@@ -12,6 +12,8 @@ class TokenPersonalizadoSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['email'] = user.email
         token['is_staff'] = user.is_staff
+        token['is_teacher'] = user.is_teacher
+        token['is_student'] = user.is_student
         return token
 
 
