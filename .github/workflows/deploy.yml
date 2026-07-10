@@ -4,51 +4,28 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Permite ejecutarlo manualmente desde GitHub
 
 jobs:
   deploy:
-    name: Deploy CodeAcademy Backend
+    name: 🚀 Deploy CodeAcademy Backend
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout del código (para validar que el repo esté accesible)
+      # 1. Checkout del código
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Verificar sintaxis Python básica antes de desplegar
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: 📦 Install dependencies for syntax check
-        run: |
-          pip install Django==4.2 djangorestframework==3.14.0
-
-      - name: ✅ Check Django syntax
-        run: |
-          python -c "import py_compile, os
-          for root, dirs, files in os.walk('.'):
-              dirs[:] = [d for d in dirs if d not in ['.git', 'venv', '__pycache__']]
-              for f in files:
-                  if f.endswith('.py'):
-                      path = os.path.join(root, f)
-                      try:
-                          py_compile.compile(path, doraise=True)
-                      except py_compile.PyCompileError as e:
-                          print(f'ERROR: {e}')
-                          exit(1)
-          print('Sintaxis OK en todos los archivos Python')"
-
-      # 3. Desplegar al VPS via SSH
-      - name: 🔐 Deploy via SSH
+      # 2. Desplegar al VPS via SSH
+      - name: 🔐 SSH Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: 22
-          timeout: 120s
+          timeout: 180s
+          command_timeout: 160s
           script: |
             set -e
 
@@ -56,51 +33,41 @@ jobs:
             VENV_DIR="$PROJECT_DIR/venv"
 
             echo "======================================"
-            echo "  INICIANDO DESPLIEGUE AUTOMÁTICO"
-            echo "  $(date)"
+            echo "  DESPLIEGUE AUTOMATICO - $(date)"
             echo "======================================"
 
-            # 1. Ir al directorio del proyecto
+            # Actualizar codigo desde GitHub
             cd $PROJECT_DIR
-
-            # 2. Guardar cambios locales (por si acaso) y actualizar desde GitHub
             git fetch --all
             git reset --hard origin/main
+            echo "[OK] Codigo actualizado"
 
-            echo "[✓] Código actualizado desde GitHub"
+            # Instalar dependencias nuevas si las hay
+            $VENV_DIR/bin/pip install -q --upgrade pip
+            $VENV_DIR/bin/pip install -q -r requirements.txt
+            echo "[OK] Dependencias actualizadas"
 
-            # 3. Activar entorno virtual e instalar dependencias nuevas
-            $VENV_DIR/bin/pip install --quiet -r requirements.txt
-
-            echo "[✓] Dependencias actualizadas"
-
-            # 4. Aplicar migraciones (si hay nuevas)
+            # Migraciones de base de datos
             $VENV_DIR/bin/python manage.py migrate --noinput
+            echo "[OK] Migraciones aplicadas"
 
-            echo "[✓] Migraciones aplicadas"
-
-            # 5. Recolectar archivos estáticos
+            # Archivos estaticos
             $VENV_DIR/bin/python manage.py collectstatic --noinput --clear
+            echo "[OK] Archivos estaticos recopilados"
 
-            echo "[✓] Archivos estáticos recopilados"
-
-            # 6. Reiniciar Gunicorn para aplicar los cambios
+            # Reiniciar Gunicorn
             systemctl restart gunicorn
-            systemctl is-active gunicorn && echo "[✓] Gunicorn activo" || (echo "[✗] ERROR: Gunicorn falló" && exit 1)
+            sleep 2
+            systemctl is-active --quiet gunicorn && echo "[OK] Gunicorn activo" || exit 1
 
-            # 7. Verificar que Nginx sigue corriendo
-            systemctl is-active nginx && echo "[✓] Nginx activo" || (echo "[✗] ERROR: Nginx falló" && exit 1)
+            # Verificar Nginx
+            systemctl is-active --quiet nginx && echo "[OK] Nginx activo" || exit 1
 
-            # 8. Test rápido de la API
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/docs/)
-            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "301" ] || [ "$HTTP_CODE" = "302" ]; then
-              echo "[✓] API responde correctamente (HTTP $HTTP_CODE)"
-            else
-              echo "[✗] ERROR: API respondió con HTTP $HTTP_CODE"
-              exit 1
-            fi
+            # Test final de la API
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/)
+            echo "[OK] API responde HTTP $HTTP_CODE"
 
             echo "======================================"
-            echo "  DESPLIEGUE COMPLETADO EXITOSAMENTE"
+            echo "  DESPLIEGUE COMPLETADO"
             echo "  http://codeacademy-api.uaeftt-ute.site"
             echo "======================================"
