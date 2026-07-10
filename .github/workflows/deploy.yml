@@ -16,7 +16,7 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Desplegar al VPS via SSH
+      # 2. Desplegar al VPS via SSH con manejo robusto de errores
       - name: 🔐 SSH Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -27,47 +27,139 @@ jobs:
           timeout: 180s
           command_timeout: 160s
           script: |
-            set -e
+            # -----------------------------------------------
+            # No abortar en el primer error — manejamos cada
+            # paso individualmente para mayor resiliencia
+            # -----------------------------------------------
+            set +e
 
             PROJECT_DIR="/opt/codeacademy/CodeAcademy_bakend"
             VENV_DIR="$PROJECT_DIR/venv"
+            PYTHON="$VENV_DIR/bin/python"
+            PIP="$VENV_DIR/bin/pip"
+            ERRORS=0
 
-            echo "======================================"
-            echo "  DESPLIEGUE AUTOMATICO - $(date)"
-            echo "======================================"
+            log_ok()  { echo "[✓] $1"; }
+            log_err() { echo "[✗] ERROR: $1"; ERRORS=$((ERRORS+1)); }
+            log_info(){ echo "[→] $1"; }
 
-            # Actualizar codigo desde GitHub
+            echo "================================================"
+            echo "  DESPLIEGUE AUTOMATICO"
+            echo "  $(date '+%Y-%m-%d %H:%M:%S %Z')"
+            echo "================================================"
+
+            # ── 1. Actualizar código ──────────────────────────
+            log_info "Actualizando codigo desde GitHub..."
             cd $PROJECT_DIR
-            git fetch --all
-            git reset --hard origin/main
-            echo "[OK] Codigo actualizado"
+            git fetch --all 2>&1
+            git reset --hard origin/main 2>&1
+            if [ $? -eq 0 ]; then
+              log_ok "Codigo actualizado ($(git log -1 --pretty='%h %s'))"
+            else
+              log_err "git reset fallo — intentando git pull..."
+              git pull origin main 2>&1 || log_err "git pull tambien fallo"
+            fi
 
-            # Instalar dependencias nuevas si las hay
-            $VENV_DIR/bin/pip install -q --upgrade pip
-            $VENV_DIR/bin/pip install -q -r requirements.txt
-            echo "[OK] Dependencias actualizadas"
+            # ── 2. Entorno virtual (crear si no existe) ────────
+            if [ ! -d "$VENV_DIR" ]; then
+              log_info "Creando entorno virtual..."
+              python3 -m venv $VENV_DIR 2>&1
+              log_ok "Entorno virtual creado"
+            fi
 
-            # Migraciones de base de datos
-            $VENV_DIR/bin/python manage.py migrate --noinput
-            echo "[OK] Migraciones aplicadas"
+            # ── 3. Dependencias ───────────────────────────────
+            log_info "Instalando/actualizando dependencias..."
+            $PIP install -q --upgrade pip 2>&1
+            $PIP install -q -r requirements.txt 2>&1
+            if [ $? -eq 0 ]; then
+              log_ok "Dependencias actualizadas"
+            else
+              log_err "pip install fallo — continuando de todas formas"
+            fi
 
-            # Archivos estaticos
-            $VENV_DIR/bin/python manage.py collectstatic --noinput --clear
-            echo "[OK] Archivos estaticos recopilados"
+            # ── 4. Migraciones ────────────────────────────────
+            log_info "Aplicando migraciones..."
+            $PYTHON manage.py makemigrations --noinput 2>&1
+            $PYTHON manage.py migrate --noinput 2>&1
+            if [ $? -eq 0 ]; then
+              log_ok "Migraciones aplicadas"
+            else
+              log_err "migrate fallo — puede que no haya cambios pendientes"
+            fi
 
-            # Reiniciar Gunicorn
-            systemctl restart gunicorn
-            sleep 2
-            systemctl is-active --quiet gunicorn && echo "[OK] Gunicorn activo" || exit 1
+            # ── 5. Archivos estáticos ─────────────────────────
+            log_info "Recopilando archivos estaticos..."
+            $PYTHON manage.py collectstatic --noinput --clear 2>&1
+            if [ $? -eq 0 ]; then
+              log_ok "Archivos estaticos recopilados"
+            else
+              log_info "collectstatic con --clear fallo, intentando sin --clear..."
+              $PYTHON manage.py collectstatic --noinput 2>&1
+              [ $? -eq 0 ] && log_ok "Archivos estaticos recopilados (sin --clear)" || log_err "collectstatic fallo completamente"
+            fi
 
-            # Verificar Nginx
-            systemctl is-active --quiet nginx && echo "[OK] Nginx activo" || exit 1
+            # ── 6. Reiniciar Gunicorn ─────────────────────────
+            log_info "Reiniciando Gunicorn..."
+            systemctl restart gunicorn 2>&1
+            sleep 3
 
-            # Test final de la API
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/)
-            echo "[OK] API responde HTTP $HTTP_CODE"
+            # Reintentos si Gunicorn no arranca de inmediato
+            for i in 1 2 3; do
+              systemctl is-active --quiet gunicorn && break
+              log_info "Gunicorn no activo aun, reintento $i/3..."
+              sleep 5
+            done
 
-            echo "======================================"
-            echo "  DESPLIEGUE COMPLETADO"
-            echo "  http://codeacademy-api.uaeftt-ute.site"
-            echo "======================================"
+            if systemctl is-active --quiet gunicorn; then
+              log_ok "Gunicorn activo y corriendo"
+            else
+              log_info "Gunicorn caido — intentando reparar..."
+              systemctl daemon-reload
+              systemctl start gunicorn 2>&1
+              sleep 3
+              systemctl is-active --quiet gunicorn && log_ok "Gunicorn reparado" || log_err "Gunicorn no pudo iniciar"
+            fi
+
+            # ── 7. Verificar Nginx ────────────────────────────
+            if systemctl is-active --quiet nginx; then
+              log_ok "Nginx activo"
+            else
+              log_info "Nginx no activo — reiniciando..."
+              systemctl restart nginx 2>&1
+              sleep 2
+              systemctl is-active --quiet nginx && log_ok "Nginx reiniciado" || log_err "Nginx no pudo iniciar"
+            fi
+
+            # ── 8. Test de salud de la API (con reintentos) ───
+            log_info "Verificando respuesta de la API..."
+            API_OK=0
+            for i in 1 2 3 4 5; do
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://localhost/api/)
+              if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "301" ] || [ "$HTTP_CODE" = "302" ]; then
+                log_ok "API responde correctamente (HTTP $HTTP_CODE) en intento $i"
+                API_OK=1
+                break
+              fi
+              log_info "Intento $i/5: API responde HTTP $HTTP_CODE — esperando 5s..."
+              sleep 5
+            done
+
+            if [ $API_OK -eq 0 ]; then
+              log_err "API no responde correctamente despues de 5 intentos"
+              ERRORS=$((ERRORS+1))
+            fi
+
+            # ── Resumen final ─────────────────────────────────
+            echo ""
+            echo "================================================"
+            if [ $ERRORS -eq 0 ]; then
+              echo "  DESPLIEGUE EXITOSO - Sin errores criticos"
+              echo "  http://codeacademy-api.uaeftt-ute.site"
+              echo "================================================"
+              exit 0
+            else
+              echo "  DESPLIEGUE CON $ERRORS ERROR(ES)"
+              echo "  La API puede estar parcialmente operativa"
+              echo "================================================"
+              exit 1
+            fi
