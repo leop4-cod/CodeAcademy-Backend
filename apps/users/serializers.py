@@ -8,6 +8,10 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import User, Notification
 
+# Formatos de imagen permitidos
+ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml']
+MAX_AVATAR_SIZE_MB = 5
+
 
 class TokenPersonalizadoSerializer(TokenObtainPairSerializer):
     username_field = User.USERNAME_FIELD
@@ -44,19 +48,60 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'bio', 'avatar', 'is_teacher', 'is_student')
+        fields = ('id', 'email', 'first_name', 'last_name', 'bio', 'avatar', 'avatar_url', 'is_teacher', 'is_student')
         read_only_fields = ('id', 'email', 'is_teacher', 'is_student')
+        extra_kwargs = {'avatar': {'required': False, 'allow_null': True}}
+
+    def get_avatar_url(self, obj):
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return None
+
+
+class AvatarUploadSerializer(serializers.ModelSerializer):
+    """Serializer dedicado para subir/actualizar la foto de perfil."""
+    avatar = serializers.ImageField(required=True)
+    avatar_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('avatar', 'avatar_url')
+
+    def get_avatar_url(self, obj):
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return None
+
+    def validate_avatar(self, value):
+        # Validar tamaño máximo
+        max_size = MAX_AVATAR_SIZE_MB * 1024 * 1024
+        if value.size > max_size:
+            raise serializers.ValidationError(
+                f'La imagen es demasiado grande. El tamaño máximo permitido es {MAX_AVATAR_SIZE_MB}MB.'
+            )
+        # Validar tipo de contenido
+        content_type = getattr(value, 'content_type', '')
+        if content_type and content_type not in ALLOWED_IMAGE_TYPES:
+            raise serializers.ValidationError(
+                'Formato de imagen no soportado. Use JPG, PNG, GIF, WEBP, BMP, TIFF o SVG.'
+            )
+        return value
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
-    def validate_email(self, value):
-        if not User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("No existe un usuario con este correo electrónico.")
-        return value
+    # NOTA: NO validamos si el email existe aquí para no revelar qué cuentas están registradas.
+    # La vista maneja el caso de email inexistente silenciosamente.
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
@@ -82,3 +127,22 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = '__all__'
         read_only_fields = ('created_at',)
+
+
+class SendNotificationSerializer(serializers.Serializer):
+    """Serializer para el endpoint POST /api/emails/send/ (solo staff)."""
+    subject = serializers.CharField(max_length=255)
+    message = serializers.CharField()
+    user_id = serializers.IntegerField(required=False, allow_null=True)
+
+    def validate_user_id(self, value):
+        if value is not None:
+            try:
+                user = User.objects.get(pk=value)
+            except User.DoesNotExist:
+                raise serializers.ValidationError(f"No existe un usuario con id={value}.")
+            if user.is_staff or user.is_superuser:
+                raise serializers.ValidationError("No se puede enviar correo a un usuario staff.")
+            if not user.is_active:
+                raise serializers.ValidationError("El usuario indicado no está activo.")
+        return value
