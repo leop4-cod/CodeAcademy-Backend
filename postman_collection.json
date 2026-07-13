@@ -17,7 +17,7 @@
     "variable": [
         {
             "key": "baseUrl",
-            "value": "http://codeacademy-api.uaeftt-ute.site/api"
+            "value": "https://codeacademy-api.uaeftt-ute.site/api"
         },
         {
             "key": "accessToken",
@@ -1771,7 +1771,7 @@
                             "type": "noauth"
                         },
                         "method": "GET",
-                        "url": "http://codeacademy-api.uaeftt-ute.site/api/docs/"
+                        "url": "https://codeacademy-api.uaeftt-ute.site/api/docs/"
                     }
                 },
                 {
@@ -1781,7 +1781,7 @@
                             "type": "noauth"
                         },
                         "method": "GET",
-                        "url": "http://codeacademy-api.uaeftt-ute.site/api/docs/redoc/"
+                        "url": "https://codeacademy-api.uaeftt-ute.site/api/docs/redoc/"
                     }
                 },
                 {
@@ -1791,7 +1791,7 @@
                             "type": "noauth"
                         },
                         "method": "GET",
-                        "url": "http://codeacademy-api.uaeftt-ute.site/api/schema/"
+                        "url": "https://codeacademy-api.uaeftt-ute.site/api/schema/"
                     }
                 }
             ]
