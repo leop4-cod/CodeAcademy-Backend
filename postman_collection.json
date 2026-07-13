@@ -1,7 +1,7 @@
 {
     "info": {
-        "name": "CodeAcademy API - 20 Tablas",
-        "description": "Colección completa con CRUD para las 20 tablas del sistema CodeAcademy",
+        "name": "CodeAcademy API - Completa",
+        "description": "Colección completa con CRUD para todas las tablas del sistema CodeAcademy + Perfiles, Correos y Notificaciones",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "auth": {
@@ -17,7 +17,7 @@
     "variable": [
         {
             "key": "baseUrl",
-            "value": "http://localhost:8000/api"
+            "value": "http://codeacademy-api.uaeftt-ute.site/api"
         },
         {
             "key": "accessToken",
@@ -1771,7 +1771,7 @@
                             "type": "noauth"
                         },
                         "method": "GET",
-                        "url": "http://localhost:8000/api/docs/"
+                        "url": "http://codeacademy-api.uaeftt-ute.site/api/docs/"
                     }
                 },
                 {
@@ -1781,7 +1781,7 @@
                             "type": "noauth"
                         },
                         "method": "GET",
-                        "url": "http://localhost:8000/api/docs/redoc/"
+                        "url": "http://codeacademy-api.uaeftt-ute.site/api/docs/redoc/"
                     }
                 },
                 {
@@ -1791,7 +1791,7 @@
                             "type": "noauth"
                         },
                         "method": "GET",
-                        "url": "http://localhost:8000/api/schema/"
+                        "url": "http://codeacademy-api.uaeftt-ute.site/api/schema/"
                     }
                 }
             ]
