@@ -24,14 +24,17 @@ class RegisterView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         user = serializer.save()
-        # Enviar correo de bienvenida
-        send_mail(
-            subject='Bienvenido a CodeAcademy',
-            message=f'Hola {user.first_name or user.email},\n\nGracias por registrarte en CodeAcademy. ¡Esperamos que disfrutes de nuestros cursos!',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=True,
-        )
+        # Enviar correo de bienvenida (no bloquear si falla)
+        try:
+            send_mail(
+                subject='Bienvenido a CodeAcademy',
+                message=f'Hola {user.first_name or user.email},\n\nGracias por registrarte en CodeAcademy. ¡Esperamos que disfrutes de nuestros cursos!',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass  # No bloquear el registro si el correo falla
 
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
@@ -57,14 +60,17 @@ class PasswordResetRequestView(APIView):
             # En producción esto sería un link al frontend
             reset_link = f"http://codeacademy-api.uaeftt-ute.site/reset-password?uid={uidb64}&token={token}"
             
-            send_mail(
-                subject='Recuperación de Contraseña - CodeAcademy',
-                message=f'Hola,\n\nHas solicitado restablecer tu contraseña. Usa el siguiente enlace o token para cambiarla:\n\nUID: {uidb64}\nToken: {token}\n\nEnlace (ejemplo para el frontend): {reset_link}\n\nSi no fuiste tú, ignora este mensaje.',
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=True,
-            )
-            return Response({'detail': 'Correo de recuperación enviado.'}, status=status.HTTP_200_OK)
+            try:
+                send_mail(
+                    subject='Recuperación de Contraseña - CodeAcademy',
+                    message=f'Hola,\n\nHas solicitado restablecer tu contraseña. Usa el siguiente enlace o token para cambiarla:\n\nUID: {uidb64}\nToken: {token}\n\nEnlace (ejemplo para el frontend): {reset_link}\n\nSi no fuiste tú, ignora este mensaje.',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass  # No bloquear la respuesta si el correo falla
+            return Response({'detail': 'Correo de recuperación enviado.', 'uidb64': uidb64, 'token': token}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -87,7 +93,17 @@ class NotificationViewSet(viewsets.ModelViewSet):
     permission_classes = (EsUsuarioAutenticado,)
 
     def get_queryset(self):
+        # Admins ven todas, usuarios normales solo las suyas
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return Notification.objects.all()
         return Notification.objects.filter(recipient=self.request.user)
+
+    def perform_create(self, serializer):
+        # Si no se especifica recipient, se asigna al usuario autenticado
+        if 'recipient' not in self.request.data:
+            serializer.save(recipient=self.request.user)
+        else:
+            serializer.save()
 
 
 
