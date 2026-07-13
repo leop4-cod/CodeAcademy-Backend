@@ -1,313 +1,1800 @@
 {
-	"info": {
-		"name": "CodeAcademy API - 20 Tablas",
-		"description": "Colección completa con CRUD para las 20 tablas del sistema CodeAcademy",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{accessToken}}",
-				"type": "string"
-			}
-		]
-	},
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:8000/api"
-		},
-		{
-			"key": "accessToken",
-			"value": ""
-		}
-	],
-	"item": [
-		{
-			"name": "Autenticación",
-			"item": [
-				{
-					"name": "Registro",
-					"request": {
-						"auth": { "type": "noauth" },
-						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"usuario@example.com\",\n  \"password\": \"usuario123\",\n  \"first_name\": \"Usuario\",\n  \"last_name\": \"Prueba\",\n  \"is_student\": true\n}"
-						},
-						"url": "{{baseUrl}}/auth/register/"
-					}
-				},
-				{
-					"name": "Login Admin",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var json = pm.response.json();",
-									"if (json.access) { pm.collectionVariables.set('accessToken', json.access); }"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": { "type": "noauth" },
-						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"admin@codeacademy.com\",\n  \"password\": \"admin123\"\n}"
-						},
-						"url": "{{baseUrl}}/auth/login/"
-					}
-				},
-				{
-					"name": "Refresh Token",
-					"request": {
-						"auth": { "type": "noauth" },
-						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"refresh\": \"{{refreshToken}}\"\n}"
-						},
-						"url": "{{baseUrl}}/auth/token/refresh/"
-					}
-				}
-			]
-		},
-		{
-			"name": "1. Users",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/users/?search=admin&ordering=email&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/users/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"nuevo@example.com\",\n  \"password\": \"pass1234\",\n  \"first_name\": \"Nuevo\",\n  \"last_name\": \"Usuario\"\n}" }, "url": "{{baseUrl}}/users/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"nuevo@example.com\",\n  \"first_name\": \"Actualizado\",\n  \"last_name\": \"Usuario\"\n}" }, "url": "{{baseUrl}}/users/2/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"Parcial\"\n}" }, "url": "{{baseUrl}}/users/2/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/users/2/" } }
-			]
-		},
-		{
-			"name": "2. Categories",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/categories/?search=web&ordering=name&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/categories/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Desarrollo Web\",\n  \"slug\": \"desarrollo-web\"\n}" }, "url": "{{baseUrl}}/categories/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Desarrollo Web Avanzado\",\n  \"slug\": \"desarrollo-web\"\n}" }, "url": "{{baseUrl}}/categories/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Web Full Stack\"\n}" }, "url": "{{baseUrl}}/categories/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/categories/1/" } }
-			]
-		},
-		{
-			"name": "3. Subcategories",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/subcategories/?search=python&ordering=name&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/subcategories/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"category\": 1,\n  \"name\": \"Python & Django\",\n  \"slug\": \"python-django\"\n}" }, "url": "{{baseUrl}}/subcategories/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"category\": 1,\n  \"name\": \"Python Avanzado\",\n  \"slug\": \"python-django\"\n}" }, "url": "{{baseUrl}}/subcategories/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Django REST\"\n}" }, "url": "{{baseUrl}}/subcategories/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/subcategories/1/" } }
-			]
-		},
-		{
-			"name": "4. Courses",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/courses/?search=django&ordering=price&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/courses/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"category\": 1,\n  \"subcategory\": 1,\n  \"teacher\": 1,\n  \"title\": \"Django Completo\",\n  \"description\": \"Aprende Django desde cero\",\n  \"price\": \"49.99\",\n  \"is_published\": true\n}" }, "url": "{{baseUrl}}/courses/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"category\": 1,\n  \"subcategory\": 1,\n  \"teacher\": 1,\n  \"title\": \"Django Master\",\n  \"description\": \"Curso actualizado\",\n  \"price\": \"59.99\",\n  \"is_published\": true\n}" }, "url": "{{baseUrl}}/courses/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"price\": \"39.99\"\n}" }, "url": "{{baseUrl}}/courses/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/courses/1/" } }
-			]
-		},
-		{
-			"name": "5. Lessons",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/lessons/?search=intro&ordering=order&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/lessons/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"title\": \"Introducción\",\n  \"content\": \"Contenido de la lección\",\n  \"order\": 1,\n  \"duration\": 30\n}" }, "url": "{{baseUrl}}/lessons/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"title\": \"Introducción al curso\",\n  \"content\": \"Contenido actualizado\",\n  \"order\": 1,\n  \"duration\": 45\n}" }, "url": "{{baseUrl}}/lessons/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"duration\": 60\n}" }, "url": "{{baseUrl}}/lessons/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/lessons/1/" } }
-			]
-		},
-		{
-			"name": "6. Enrollments",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/enrollments/?ordering=-enrolled_at&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/enrollments/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1\n}" }, "url": "{{baseUrl}}/enrollments/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"student\": 2\n}" }, "url": "{{baseUrl}}/enrollments/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"completed_at\": \"2026-06-26T12:00:00Z\"\n}" }, "url": "{{baseUrl}}/enrollments/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/enrollments/1/" } }
-			]
-		},
-		{
-			"name": "7. Reviews",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/reviews/?search=excelente&ordering=-rating&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/reviews/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"rating\": 5,\n  \"comment\": \"Excelente curso\"\n}" }, "url": "{{baseUrl}}/reviews/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"student\": 2,\n  \"rating\": 4,\n  \"comment\": \"Muy bueno\"\n}" }, "url": "{{baseUrl}}/reviews/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"rating\": 5\n}" }, "url": "{{baseUrl}}/reviews/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/reviews/1/" } }
-			]
-		},
-		{
-			"name": "8. Certificates",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/certificates/?ordering=-issued_at&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/certificates/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"student\": 2,\n  \"course\": 1,\n  \"enrollment\": 1,\n  \"certificate_id\": \"CERT-001\"\n}" }, "url": "{{baseUrl}}/certificates/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"student\": 2,\n  \"course\": 1,\n  \"enrollment\": 1,\n  \"certificate_id\": \"CERT-001-UPD\"\n}" }, "url": "{{baseUrl}}/certificates/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"certificate_id\": \"CERT-001-FINAL\"\n}" }, "url": "{{baseUrl}}/certificates/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/certificates/1/" } }
-			]
-		},
-		{
-			"name": "9. Progress",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/progress/?ordering=-completed_at&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/progress/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"enrollment\": 1,\n  \"lesson\": 1,\n  \"completed\": true\n}" }, "url": "{{baseUrl}}/progress/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"enrollment\": 1,\n  \"lesson\": 1,\n  \"completed\": true\n}" }, "url": "{{baseUrl}}/progress/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"completed\": false\n}" }, "url": "{{baseUrl}}/progress/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/progress/1/" } }
-			]
-		},
-		{
-			"name": "10. Quizzes",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/quizzes/?search=examen&ordering=title&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/quizzes/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"lesson\": 1,\n  \"title\": \"Examen Final\",\n  \"pass_score\": 70,\n  \"is_published\": true\n}" }, "url": "{{baseUrl}}/quizzes/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"lesson\": 1,\n  \"title\": \"Examen Final v2\",\n  \"pass_score\": 80,\n  \"is_published\": true\n}" }, "url": "{{baseUrl}}/quizzes/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"pass_score\": 75\n}" }, "url": "{{baseUrl}}/quizzes/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/quizzes/1/" } }
-			]
-		},
-		{
-			"name": "11. Questions",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/questions/?ordering=order&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/questions/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"quiz\": 1,\n  \"text\": \"¿Qué es Django?\",\n  \"order\": 1\n}" }, "url": "{{baseUrl}}/questions/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"quiz\": 1,\n  \"text\": \"¿Qué es un ORM?\",\n  \"order\": 1\n}" }, "url": "{{baseUrl}}/questions/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"order\": 2\n}" }, "url": "{{baseUrl}}/questions/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/questions/1/" } }
-			]
-		},
-		{
-			"name": "12. Answers",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/answers/?search=python&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/answers/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"question\": 1,\n  \"text\": \"Un framework web en Python\",\n  \"is_correct\": true\n}" }, "url": "{{baseUrl}}/answers/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"question\": 1,\n  \"text\": \"Framework Python\",\n  \"is_correct\": true\n}" }, "url": "{{baseUrl}}/answers/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"is_correct\": false\n}" }, "url": "{{baseUrl}}/answers/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/answers/1/" } }
-			]
-		},
-		{
-			"name": "13. Quiz Attempts",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/quiz-attempts/?ordering=-started_at&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/quiz-attempts/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"quiz\": 1\n}" }, "url": "{{baseUrl}}/quiz-attempts/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"quiz\": 1,\n  \"student\": 2,\n  \"score\": 85,\n  \"passed\": true\n}" }, "url": "{{baseUrl}}/quiz-attempts/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"score\": 90,\n  \"passed\": true\n}" }, "url": "{{baseUrl}}/quiz-attempts/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/quiz-attempts/1/" } }
-			]
-		},
-		{
-			"name": "14. Quiz Answers",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/quiz-answers/?page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/quiz-answers/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"attempt\": 1,\n  \"question\": 1,\n  \"answer\": 1,\n  \"is_correct\": true\n}" }, "url": "{{baseUrl}}/quiz-answers/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"attempt\": 1,\n  \"question\": 1,\n  \"answer\": 1,\n  \"is_correct\": true\n}" }, "url": "{{baseUrl}}/quiz-answers/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"is_correct\": false\n}" }, "url": "{{baseUrl}}/quiz-answers/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/quiz-answers/1/" } }
-			]
-		},
-		{
-			"name": "15. Discussion Forums",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/discussion-forums/?search=dudas&ordering=-created_at&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/discussion-forums/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"title\": \"Foro de Dudas\",\n  \"description\": \"Espacio para preguntas\"\n}" }, "url": "{{baseUrl}}/discussion-forums/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"title\": \"Foro General\",\n  \"description\": \"Actualizado\"\n}" }, "url": "{{baseUrl}}/discussion-forums/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Foro Principal\"\n}" }, "url": "{{baseUrl}}/discussion-forums/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/discussion-forums/1/" } }
-			]
-		},
-		{
-			"name": "16. Forum Posts",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/forum-posts/?search=migraciones&ordering=-created_at&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/forum-posts/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"forum\": 1,\n  \"title\": \"Duda con migraciones\",\n  \"content\": \"¿Cómo ejecuto migrate?\"\n}" }, "url": "{{baseUrl}}/forum-posts/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"forum\": 1,\n  \"author\": 2,\n  \"title\": \"Duda resuelta\",\n  \"content\": \"Contenido actualizado\"\n}" }, "url": "{{baseUrl}}/forum-posts/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Migraciones Django\"\n}" }, "url": "{{baseUrl}}/forum-posts/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/forum-posts/1/" } }
-			]
-		},
-		{
-			"name": "17. Forum Comments",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/forum-comments/?ordering=-created_at&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/forum-comments/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"post\": 1,\n  \"content\": \"Usa makemigrations y migrate.\"\n}" }, "url": "{{baseUrl}}/forum-comments/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"post\": 1,\n  \"author\": 1,\n  \"content\": \"Respuesta actualizada\"\n}" }, "url": "{{baseUrl}}/forum-comments/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"content\": \"Comentario editado\"\n}" }, "url": "{{baseUrl}}/forum-comments/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/forum-comments/1/" } }
-			]
-		},
-		{
-			"name": "18. Tags",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/tags/?search=python&ordering=name&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/tags/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Python\",\n  \"slug\": \"python\"\n}" }, "url": "{{baseUrl}}/tags/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Python 3\",\n  \"slug\": \"python\"\n}" }, "url": "{{baseUrl}}/tags/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Python Avanzado\"\n}" }, "url": "{{baseUrl}}/tags/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/tags/1/" } }
-			]
-		},
-		{
-			"name": "19. Course Tags",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/course-tags/?page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/course-tags/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"tag\": 1\n}" }, "url": "{{baseUrl}}/course-tags/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1,\n  \"tag\": 2\n}" }, "url": "{{baseUrl}}/course-tags/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tag\": 2\n}" }, "url": "{{baseUrl}}/course-tags/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/course-tags/1/" } }
-			]
-		},
-		{
-			"name": "20. Wishlist",
-			"item": [
-				{ "name": "Listar", "request": { "method": "GET", "url": "{{baseUrl}}/wishlist/?ordering=-added_at&page=1" } },
-				{ "name": "Obtener", "request": { "method": "GET", "url": "{{baseUrl}}/wishlist/1/" } },
-				{ "name": "Crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 1\n}" }, "url": "{{baseUrl}}/wishlist/" } },
-				{ "name": "Actualizar (PUT)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"student\": 2,\n  \"course\": 1\n}" }, "url": "{{baseUrl}}/wishlist/1/" } },
-				{ "name": "Actualizar (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"course\": 2\n}" }, "url": "{{baseUrl}}/wishlist/1/" } },
-				{ "name": "Eliminar", "request": { "method": "DELETE", "url": "{{baseUrl}}/wishlist/1/" } }
-			]
-		},
-		{
-			"name": "Documentación",
-			"item": [
-				{ "name": "Swagger UI", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "http://localhost:8000/api/docs/" } },
-				{ "name": "ReDoc", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "http://localhost:8000/api/docs/redoc/" } },
-				{ "name": "OpenAPI Schema", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "http://localhost:8000/api/schema/" } }
-			]
-		}
-	]
+    "info": {
+        "name": "CodeAcademy API - 20 Tablas",
+        "description": "Colección completa con CRUD para las 20 tablas del sistema CodeAcademy",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{accessToken}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8000/api"
+        },
+        {
+            "key": "accessToken",
+            "value": ""
+        }
+    ],
+    "item": [
+        {
+            "name": "Autenticación",
+            "item": [
+                {
+                    "name": "Registro",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "email",
+                                    "value": "nuevo.usuario@example.com",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "pass1234",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "first_name",
+                                    "value": "Nuevo",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "last_name",
+                                    "value": "Usuario",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "avatar",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/auth/register/"
+                    }
+                },
+                {
+                    "name": "Login Admin",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var json = pm.response.json();",
+                                    "if (json.access) { pm.collectionVariables.set('accessToken', json.access); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"admin@codeacademy.com\",\n  \"password\": \"admin123\"\n}"
+                        },
+                        "url": "{{baseUrl}}/auth/login/"
+                    }
+                },
+                {
+                    "name": "Refresh Token",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refresh\": \"{{refreshToken}}\"\n}"
+                        },
+                        "url": "{{baseUrl}}/auth/token/refresh/"
+                    }
+                },
+                {
+                    "name": "Mi Perfil (GET)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/auth/profile/"
+                    }
+                },
+                {
+                    "name": "Actualizar Mi Perfil (PATCH con Foto)",
+                    "request": {
+                        "method": "PATCH",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "first_name",
+                                    "value": "Actualizado",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "avatar",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/auth/profile/"
+                    }
+                },
+                {
+                    "name": "Solicitar Reseteo de Contraseña",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"nuevo.usuario@example.com\"\n}"
+                        },
+                        "url": "{{baseUrl}}/auth/password-reset/"
+                    }
+                },
+                {
+                    "name": "Confirmar Reseteo de Contraseña",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"uidb64\": \"MTE\",\n  \"token\": \"abc-123\",\n  \"new_password\": \"nueva_password\"\n}"
+                        },
+                        "url": "{{baseUrl}}/auth/password-reset-confirm/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "1. Users",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/users/?search=admin&ordering=email&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/users/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"nuevo@example.com\",\n  \"password\": \"pass1234\",\n  \"first_name\": \"Nuevo\",\n  \"last_name\": \"Usuario\"\n}"
+                        },
+                        "url": "{{baseUrl}}/users/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"nuevo@example.com\",\n  \"first_name\": \"Actualizado\",\n  \"last_name\": \"Usuario\"\n}"
+                        },
+                        "url": "{{baseUrl}}/users/2/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"first_name\": \"Parcial\"\n}"
+                        },
+                        "url": "{{baseUrl}}/users/2/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/users/2/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Notificaciones",
+            "item": [
+                {
+                    "name": "Mis Notificaciones",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/notifications/"
+                    }
+                },
+                {
+                    "name": "Marcar Notificación como Leída",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"is_read\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/notifications/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Categories",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/categories/?search=web&ordering=name&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/categories/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Desarrollo Web\",\n  \"slug\": \"desarrollo-web\"\n}"
+                        },
+                        "url": "{{baseUrl}}/categories/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Desarrollo Web Avanzado\",\n  \"slug\": \"desarrollo-web\"\n}"
+                        },
+                        "url": "{{baseUrl}}/categories/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Web Full Stack\"\n}"
+                        },
+                        "url": "{{baseUrl}}/categories/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/categories/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Subcategories",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/subcategories/?search=python&ordering=name&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/subcategories/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"category\": 1,\n  \"name\": \"Python & Django\",\n  \"slug\": \"python-django\"\n}"
+                        },
+                        "url": "{{baseUrl}}/subcategories/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"category\": 1,\n  \"name\": \"Python Avanzado\",\n  \"slug\": \"python-django\"\n}"
+                        },
+                        "url": "{{baseUrl}}/subcategories/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Django REST\"\n}"
+                        },
+                        "url": "{{baseUrl}}/subcategories/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/subcategories/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Courses",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/courses/?search=django&ordering=price&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/courses/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"category\": 1,\n  \"subcategory\": 1,\n  \"teacher\": 1,\n  \"title\": \"Django Completo\",\n  \"description\": \"Aprende Django desde cero\",\n  \"price\": \"49.99\",\n  \"is_published\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/courses/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"category\": 1,\n  \"subcategory\": 1,\n  \"teacher\": 1,\n  \"title\": \"Django Master\",\n  \"description\": \"Curso actualizado\",\n  \"price\": \"59.99\",\n  \"is_published\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/courses/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"price\": \"39.99\"\n}"
+                        },
+                        "url": "{{baseUrl}}/courses/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/courses/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Lessons",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/lessons/?search=intro&ordering=order&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/lessons/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"title\": \"Introducción\",\n  \"content\": \"Contenido de la lección\",\n  \"order\": 1,\n  \"duration\": 30\n}"
+                        },
+                        "url": "{{baseUrl}}/lessons/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"title\": \"Introducción al curso\",\n  \"content\": \"Contenido actualizado\",\n  \"order\": 1,\n  \"duration\": 45\n}"
+                        },
+                        "url": "{{baseUrl}}/lessons/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"duration\": 60\n}"
+                        },
+                        "url": "{{baseUrl}}/lessons/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/lessons/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6. Enrollments",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/enrollments/?ordering=-enrolled_at&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/enrollments/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1\n}"
+                        },
+                        "url": "{{baseUrl}}/enrollments/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"student\": 2\n}"
+                        },
+                        "url": "{{baseUrl}}/enrollments/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"completed_at\": \"2026-06-26T12:00:00Z\"\n}"
+                        },
+                        "url": "{{baseUrl}}/enrollments/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/enrollments/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "7. Reviews",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/reviews/?search=excelente&ordering=-rating&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/reviews/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"rating\": 5,\n  \"comment\": \"Excelente curso\"\n}"
+                        },
+                        "url": "{{baseUrl}}/reviews/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"student\": 2,\n  \"rating\": 4,\n  \"comment\": \"Muy bueno\"\n}"
+                        },
+                        "url": "{{baseUrl}}/reviews/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"rating\": 5\n}"
+                        },
+                        "url": "{{baseUrl}}/reviews/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/reviews/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "8. Certificates",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/certificates/?ordering=-issued_at&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/certificates/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"student\": 2,\n  \"course\": 1,\n  \"enrollment\": 1,\n  \"certificate_id\": \"CERT-001\"\n}"
+                        },
+                        "url": "{{baseUrl}}/certificates/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"student\": 2,\n  \"course\": 1,\n  \"enrollment\": 1,\n  \"certificate_id\": \"CERT-001-UPD\"\n}"
+                        },
+                        "url": "{{baseUrl}}/certificates/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"certificate_id\": \"CERT-001-FINAL\"\n}"
+                        },
+                        "url": "{{baseUrl}}/certificates/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/certificates/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "9. Progress",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/progress/?ordering=-completed_at&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/progress/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"enrollment\": 1,\n  \"lesson\": 1,\n  \"completed\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/progress/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"enrollment\": 1,\n  \"lesson\": 1,\n  \"completed\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/progress/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"completed\": false\n}"
+                        },
+                        "url": "{{baseUrl}}/progress/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/progress/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "10. Quizzes",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/quizzes/?search=examen&ordering=title&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/quizzes/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"lesson\": 1,\n  \"title\": \"Examen Final\",\n  \"pass_score\": 70,\n  \"is_published\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/quizzes/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"lesson\": 1,\n  \"title\": \"Examen Final v2\",\n  \"pass_score\": 80,\n  \"is_published\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/quizzes/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"pass_score\": 75\n}"
+                        },
+                        "url": "{{baseUrl}}/quizzes/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/quizzes/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "11. Questions",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/questions/?ordering=order&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/questions/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"quiz\": 1,\n  \"text\": \"¿Qué es Django?\",\n  \"order\": 1\n}"
+                        },
+                        "url": "{{baseUrl}}/questions/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"quiz\": 1,\n  \"text\": \"¿Qué es un ORM?\",\n  \"order\": 1\n}"
+                        },
+                        "url": "{{baseUrl}}/questions/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"order\": 2\n}"
+                        },
+                        "url": "{{baseUrl}}/questions/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/questions/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "12. Answers",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/answers/?search=python&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/answers/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"question\": 1,\n  \"text\": \"Un framework web en Python\",\n  \"is_correct\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/answers/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"question\": 1,\n  \"text\": \"Framework Python\",\n  \"is_correct\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/answers/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"is_correct\": false\n}"
+                        },
+                        "url": "{{baseUrl}}/answers/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/answers/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "13. Quiz Attempts",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/quiz-attempts/?ordering=-started_at&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/quiz-attempts/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"quiz\": 1\n}"
+                        },
+                        "url": "{{baseUrl}}/quiz-attempts/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"quiz\": 1,\n  \"student\": 2,\n  \"score\": 85,\n  \"passed\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/quiz-attempts/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"score\": 90,\n  \"passed\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/quiz-attempts/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/quiz-attempts/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "14. Quiz Answers",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/quiz-answers/?page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/quiz-answers/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"attempt\": 1,\n  \"question\": 1,\n  \"answer\": 1,\n  \"is_correct\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/quiz-answers/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"attempt\": 1,\n  \"question\": 1,\n  \"answer\": 1,\n  \"is_correct\": true\n}"
+                        },
+                        "url": "{{baseUrl}}/quiz-answers/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"is_correct\": false\n}"
+                        },
+                        "url": "{{baseUrl}}/quiz-answers/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/quiz-answers/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "15. Discussion Forums",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/discussion-forums/?search=dudas&ordering=-created_at&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/discussion-forums/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"title\": \"Foro de Dudas\",\n  \"description\": \"Espacio para preguntas\"\n}"
+                        },
+                        "url": "{{baseUrl}}/discussion-forums/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"title\": \"Foro General\",\n  \"description\": \"Actualizado\"\n}"
+                        },
+                        "url": "{{baseUrl}}/discussion-forums/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Foro Principal\"\n}"
+                        },
+                        "url": "{{baseUrl}}/discussion-forums/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/discussion-forums/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "16. Forum Posts",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/forum-posts/?search=migraciones&ordering=-created_at&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/forum-posts/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"forum\": 1,\n  \"title\": \"Duda con migraciones\",\n  \"content\": \"¿Cómo ejecuto migrate?\"\n}"
+                        },
+                        "url": "{{baseUrl}}/forum-posts/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"forum\": 1,\n  \"author\": 2,\n  \"title\": \"Duda resuelta\",\n  \"content\": \"Contenido actualizado\"\n}"
+                        },
+                        "url": "{{baseUrl}}/forum-posts/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Migraciones Django\"\n}"
+                        },
+                        "url": "{{baseUrl}}/forum-posts/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/forum-posts/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "17. Forum Comments",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/forum-comments/?ordering=-created_at&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/forum-comments/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"post\": 1,\n  \"content\": \"Usa makemigrations y migrate.\"\n}"
+                        },
+                        "url": "{{baseUrl}}/forum-comments/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"post\": 1,\n  \"author\": 1,\n  \"content\": \"Respuesta actualizada\"\n}"
+                        },
+                        "url": "{{baseUrl}}/forum-comments/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"content\": \"Comentario editado\"\n}"
+                        },
+                        "url": "{{baseUrl}}/forum-comments/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/forum-comments/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "18. Tags",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/tags/?search=python&ordering=name&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/tags/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Python\",\n  \"slug\": \"python\"\n}"
+                        },
+                        "url": "{{baseUrl}}/tags/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Python 3\",\n  \"slug\": \"python\"\n}"
+                        },
+                        "url": "{{baseUrl}}/tags/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Python Avanzado\"\n}"
+                        },
+                        "url": "{{baseUrl}}/tags/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/tags/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "19. Course Tags",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/course-tags/?page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/course-tags/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"tag\": 1\n}"
+                        },
+                        "url": "{{baseUrl}}/course-tags/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1,\n  \"tag\": 2\n}"
+                        },
+                        "url": "{{baseUrl}}/course-tags/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"tag\": 2\n}"
+                        },
+                        "url": "{{baseUrl}}/course-tags/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/course-tags/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "20. Wishlist",
+            "item": [
+                {
+                    "name": "Listar",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/wishlist/?ordering=-added_at&page=1"
+                    }
+                },
+                {
+                    "name": "Obtener",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/wishlist/1/"
+                    }
+                },
+                {
+                    "name": "Crear",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 1\n}"
+                        },
+                        "url": "{{baseUrl}}/wishlist/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PUT)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"student\": 2,\n  \"course\": 1\n}"
+                        },
+                        "url": "{{baseUrl}}/wishlist/1/"
+                    }
+                },
+                {
+                    "name": "Actualizar (PATCH)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"course\": 2\n}"
+                        },
+                        "url": "{{baseUrl}}/wishlist/1/"
+                    }
+                },
+                {
+                    "name": "Eliminar",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/wishlist/1/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Documentación",
+            "item": [
+                {
+                    "name": "Swagger UI",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "url": "http://localhost:8000/api/docs/"
+                    }
+                },
+                {
+                    "name": "ReDoc",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "url": "http://localhost:8000/api/docs/redoc/"
+                    }
+                },
+                {
+                    "name": "OpenAPI Schema",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "url": "http://localhost:8000/api/schema/"
+                    }
+                }
+            ]
+        }
+    ]
 }
