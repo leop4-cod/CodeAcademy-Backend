@@ -119,7 +119,7 @@ class PasswordResetRequestView(APIView):
                 uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
 
                 reset_link = (
-                    f"https://codeacademy-api.uaeftt-ute.site/reset-password"
+                    f"https://code-academy.uaeftt-ute.site/reset-password"
                     f"?uid={uidb64}&token={token}"
                 )
 
