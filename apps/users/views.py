@@ -17,6 +17,7 @@ from .serializers import (
     SendNotificationSerializer,
 )
 from .permissions import EsAdministrador, EsUsuarioAutenticado
+from .email_templates import get_codeacademy_html_email
 
 
 class RegisterView(generics.CreateAPIView):
@@ -28,12 +29,19 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()
         # Enviar correo de bienvenida (no bloquear si falla)
         try:
+            nombre = user.first_name or user.email
+            html_msg = get_codeacademy_html_email(
+                title='¡Bienvenido a la academia!',
+                content_html=f'<p>Hola <strong>{nombre}</strong>,</p><p>Gracias por registrarte en CodeAcademy. ¡Esperamos que disfrutes de nuestros cursos y potencies tu carrera al máximo nivel!</p>',
+                call_to_action={'url': 'https://codeacademy-api.uaeftt-ute.site/', 'text': 'Ir a la plataforma'}
+            )
             send_mail(
                 subject='Bienvenido a CodeAcademy',
-                message=f'Hola {user.first_name or user.email},\n\nGracias por registrarte en CodeAcademy. ¡Esperamos que disfrutes de nuestros cursos!',
+                message=f'Hola {nombre},\n\nGracias por registrarte en CodeAcademy. ¡Esperamos que disfrutes de nuestros cursos!',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
                 fail_silently=True,
+                html_message=html_msg,
             )
         except Exception:
             pass  # No bloquear el registro si el correo falla
@@ -115,6 +123,12 @@ class PasswordResetRequestView(APIView):
                     f"?uid={uidb64}&token={token}"
                 )
 
+                html_msg = get_codeacademy_html_email(
+                    title='Recuperación de Contraseña',
+                    content_html=f'<p>Hola,</p><p>Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo para asignar una nueva.</p><p style="margin-top:20px; font-size:14px; color:#94a3b8;">Si no fuiste tú, puedes ignorar este mensaje de forma segura.</p>',
+                    call_to_action={'url': reset_link, 'text': 'Restablecer Contraseña'}
+                )
+
                 send_mail(
                     subject='Recuperación de Contraseña - CodeAcademy',
                     message=(
@@ -128,6 +142,7 @@ class PasswordResetRequestView(APIView):
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
                     fail_silently=True,
+                    html_message=html_msg,
                 )
             except User.DoesNotExist:
                 pass  # No revelar que el correo no existe
@@ -231,12 +246,19 @@ class SendNotificationView(APIView):
             try:
                 greeting = f'Hola {user.first_name or user.email},'
                 full_message = f'{greeting}\n\n{message}\n\n— El equipo de CodeAcademy'
+                
+                html_msg = get_codeacademy_html_email(
+                    title=subject,
+                    content_html=f'<p>{greeting}</p><p>{message.replace(chr(10), "<br>")}</p><p style="margin-top: 30px;">— El equipo de CodeAcademy</p>'
+                )
+                
                 send_mail(
                     subject=subject,
                     message=full_message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
                     fail_silently=False,
+                    html_message=html_msg,
                 )
                 sent += 1
             except Exception:
