@@ -201,7 +201,7 @@ if _email_user and _email_password and _email_password != 'placeholder_password'
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = _email_user
     EMAIL_HOST_PASSWORD = _email_password
-    DEFAULT_FROM_EMAIL = f'CodeAcademy <{_email_user}>'
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'CodeAcademy <leo0411201@gmail.com>')
     EMAIL_TIMEOUT = 10  # Máximo 10 segundos para enviar
 else:
     # Sin credenciales válidas, loguear emails en consola (no bloquea)
