@@ -196,12 +196,12 @@ _email_password = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
 if _email_user and _email_password and _email_password != 'placeholder_password':
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp-relay.brevo.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 2525))
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = _email_user
     EMAIL_HOST_PASSWORD = _email_password
-    DEFAULT_FROM_EMAIL = _email_user
+    DEFAULT_FROM_EMAIL = f'CodeAcademy <{_email_user}>'
     EMAIL_TIMEOUT = 10  # Máximo 10 segundos para enviar
 else:
     # Sin credenciales válidas, loguear emails en consola (no bloquea)
